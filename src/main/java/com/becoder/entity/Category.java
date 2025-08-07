@@ -16,7 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Category {
+public class Category extends BaseModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
