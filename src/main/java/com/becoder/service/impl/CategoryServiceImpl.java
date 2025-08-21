@@ -20,7 +20,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
 	private CategoryRepository categoryRepo;
-	
+
 	@Autowired
 	private ModelMapper mapper;
 
@@ -30,11 +30,15 @@ public class CategoryServiceImpl implements CategoryService {
 //		category.setName(categoryDto.getName());
 //		category.setDescription(categoryDto.getDescription());
 //		category.setIsActive(categoryDto.getIsActive());
-		
-		Category category =  mapper.map(categoryDto, Category.class);
-        category.setIsDeleted(false);
-        category.setCreatedBy(1);
-        category.setCreatedOn(new Date());
+
+		Category category = mapper.map(categoryDto, Category.class);
+		if (ObjectUtils.isEmpty(categoryDto.getId())) {
+			category.setIsDeleted(false);
+			category.setCreatedBy(1);
+			category.setCreatedOn(new Date());
+		} else {
+			updateCategory(category);
+		}
 		Category saveCategory = categoryRepo.save(category);
 		if (ObjectUtils.isEmpty(saveCategory)) {
 			return false;
@@ -42,35 +46,48 @@ public class CategoryServiceImpl implements CategoryService {
 		return true;
 	}
 
+	private void updateCategory(Category category) {
+		Optional<Category> findById = categoryRepo.findById(category.getId());
+		if (findById.isPresent()) {
+			Category existingCategory = findById.get();
+			category.setCreatedBy(existingCategory.getCreatedBy());
+			category.setCreatedOn(existingCategory.getCreatedOn());
+			category.setIsDeleted(true);
+			category.setUpdatedBy(1);
+			category.setUpdatedOn(new Date());
+		}
+	}
+
 	@Override
 	public List<CategoryDto> getAllCategory() {
 		List<Category> categories = categoryRepo.findByIsDeletedFalse();
 
-		 List<CategoryDto> categoryDtoList = categories.stream().map(cat-> mapper.map(cat, CategoryDto.class)).toList();
+		List<CategoryDto> categoryDtoList = categories.stream().map(cat -> mapper.map(cat, CategoryDto.class)).toList();
 		return categoryDtoList;
 	}
 
 	@Override
 	public List<CategoryResponse> getActiveCategory() {
 		List<Category> categories = categoryRepo.findByIsActiveTrueAndIsDeletedFalse();
-		List<CategoryResponse> categoryList = categories.stream().map(cat->mapper.map(cat, CategoryResponse.class)).toList();
+		List<CategoryResponse> categoryList = categories.stream().map(cat -> mapper.map(cat, CategoryResponse.class))
+				.toList();
 		return categoryList;
 	}
 
 	@Override
 	public CategoryDto getCategoryById(Integer id) {
-		 Optional<Category> findByCategory = categoryRepo.findByIdAndIsDeletedFalse(id);
-		 if(findByCategory.isPresent()) {
-			 Category category =  findByCategory.get();
-			 return mapper.map(category, CategoryDto.class);
-		 }
+		Optional<Category> findByCategory = categoryRepo.findByIdAndIsDeletedFalse(id);
+		if (findByCategory.isPresent()) {
+			Category category = findByCategory.get();
+			return mapper.map(category, CategoryDto.class);
+		}
 		return null;
 	}
 
 	@Override
 	public Boolean deleteCategoryById(Integer id) {
 		Optional<Category> findByCategory = categoryRepo.findById(id);
-		if(findByCategory.isPresent()) {
+		if (findByCategory.isPresent()) {
 			Category category = findByCategory.get();
 			category.setIsDeleted(true);
 			categoryRepo.save(category);
@@ -78,11 +95,5 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 		return false;
 	}
-	
-	
-	
-	
-	
-	
 
 }
