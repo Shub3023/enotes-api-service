@@ -13,8 +13,10 @@ import com.becoder.dto.CategoryDto;
 import com.becoder.dto.CategoryResponse;
 import com.becoder.entity.Category;
 import com.becoder.exception.ResourceNotFoundException;
+import com.becoder.exception.ValidationException;
 import com.becoder.repository.CategoryRepository;
 import com.becoder.service.CategoryService;
+import com.becoder.utils.Validation;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -24,14 +26,14 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
 	private ModelMapper mapper;
+	
+	@Autowired
+	private Validation validation;
 
 	@Override
 	public Boolean saveCategory(CategoryDto categoryDto) {
-//		Category category = new Category();
-//		category.setName(categoryDto.getName());
-//		category.setDescription(categoryDto.getDescription());
-//		category.setIsActive(categoryDto.getIsActive());
 
+		validation.categoryValidation(categoryDto);
 		Optional<Category> existingCategory =categoryRepo.findByName(categoryDto.getName());
 		if(existingCategory.isPresent() && ObjectUtils.isEmpty(categoryDto.getId())) {
 			throw new RuntimeException("Category is already exist");
