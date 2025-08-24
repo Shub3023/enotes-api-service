@@ -1,7 +1,14 @@
 package com.becoder.exception;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -10,10 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<?> handleException(Exception e){
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<?> handleException(Exception e){
+//		return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//	}
 	
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<?> handleNullPointerException(Exception e){
@@ -26,8 +33,24 @@ public class GlobalExceptionHandler {
 	}
 	
 	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<?> handleBadRequestException(Exception e){
+	public ResponseEntity<?> handleBadRequestException(RuntimeException e){
 		log.error("GlobalException");
 		return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
 	}
+	
+	@ExceptionHandler(ValidationException.class)
+	public ResponseEntity<?> handleValidationException(ValidationException e){
+		return new ResponseEntity<>(e.getErrors(), HttpStatus.BAD_REQUEST);
+	}
+//	@ExceptionHandler(MethodArgumentNotValidException.class)
+//	public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
+//		List<ObjectError> allErrors = e.getBindingResult().getAllErrors();
+//		Map<String, Object> error = new LinkedHashMap<>();
+//		allErrors.stream().forEach(err->{
+//			String defaultMessage = err.getDefaultMessage();
+//			String field = ((FieldError)(err)).getField();
+//			error.put(field, defaultMessage);
+//		});
+//		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+//	}
 }
