@@ -30,4 +30,15 @@ public class NotesDto {
 	private Integer updatedBy;
 	
 	private Date updatedOn;
+	
+	@AllArgsConstructor
+	@NoArgsConstructor
+	@Getter
+	@Setter
+	public static class CategoryDto{
+		
+		private String name;
+		
+		private String description;
+	}
 }
